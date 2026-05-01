@@ -9,6 +9,7 @@ const PERCENTAGE_DISCOUNT = 'percentage';
 const AMOUNT_DISCOUNT = 'amount';
 const DEFAULT_PROMOTION_TYPE = 'Seasonal';
 const VALID_SCOPE_KINDS = ['all', 'vehicle', 'brand', 'model', 'category'];
+const DEFAULT_APP_TIME_ZONE = 'Asia/Colombo';
 
 const normalizeText = (value) => String(value || '').trim();
 
@@ -97,13 +98,21 @@ const normalizeStringArray = (value) => {
 const normalizeObjectIdArray = (value) => normalizeStringArray(value)
   .filter((item) => mongoose.Types.ObjectId.isValid(item));
 
-const getToday = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+const getDateInTimeZone = (date = new Date(), timeZone = process.env.APP_TIME_ZONE || DEFAULT_APP_TIME_ZONE) => {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const getPart = (type) => parts.find((part) => part.type === type)?.value;
+  const year = getPart('year');
+  const month = getPart('month');
+  const day = getPart('day');
   return `${year}-${month}-${day}`;
 };
+
+const getToday = () => getDateInTimeZone();
 
 const normalizeStoredStatus = (value) => {
   const status = normalizeText(value);
@@ -256,7 +265,7 @@ const matchesVehicle = (promotion, vehicle, options = {}) => {
     }
   }
 
-  const targetListingType = normalizeText(promotion.targetListingType || 'Sale');
+  const targetListingType = normalizeText(promotion.targetListingType);
   if (targetListingType && stringifyMatch(targetListingType) !== stringifyMatch(vehicle?.listingType)) {
     return false;
   }

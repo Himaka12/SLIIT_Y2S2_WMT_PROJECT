@@ -168,7 +168,7 @@ export function promotionMatchesVehicle(promotion, vehicle, options = {}) {
     return false;
   }
 
-  const targetListingType = normalizeText(promotion?.targetListingType || 'Sale');
+  const targetListingType = normalizeText(promotion?.targetListingType);
   if (targetListingType && stringifyMatch(targetListingType) !== stringifyMatch(vehicle?.listingType)) {
     return false;
   }

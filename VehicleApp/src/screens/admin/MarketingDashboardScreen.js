@@ -189,7 +189,7 @@ const buildInitialForm = (promotion = null) => {
     title: promotion?.title || '',
     description: promotion?.description || '',
     promotionType: promotion?.promotionType || PROMOTION_TYPES[0],
-    targetListingType: 'Sale',
+    targetListingType: promotion?.targetListingType || '',
     discountType,
     discountPercentage: discountType === 'percentage' ? String(promotion?.discountPercentage ?? '') : '',
     discountAmount: discountType === 'amount' ? String(promotion?.discountAmount ?? '') : '',
@@ -837,7 +837,7 @@ export default function MarketingDashboardScreen() {
       title: form.title.trim(),
       description: form.description.trim(),
       promotionType: form.promotionType,
-      targetListingType: 'Sale',
+      targetListingType: form.targetListingType || '',
       discountType: form.discountType,
       discountPercentage: form.discountType === 'percentage' ? String(form.discountPercentage || '').trim() : '',
       discountAmount: form.discountType === 'amount' ? sanitizeDigits(form.discountAmount) : '',
@@ -1742,7 +1742,7 @@ export default function MarketingDashboardScreen() {
                   <Badge label={selectedPromotionDetail?.showOnInventoryBanner === false ? 'Banner Off' : 'Banner On'} color="#111111" bg="#f3f4f6" />
                   <Badge label={selectedPromotionDetail?.showOnVehicleCard === false ? 'Cards Off' : 'Cards On'} color="#111111" bg="#f3f4f6" />
                   <Badge label={selectedPromotionDetail?.showOnVehicleDetails === false ? 'Details Off' : 'Details On'} color="#111111" bg="#f3f4f6" />
-                  <Badge label={selectedPromotionDetail?.targetListingType || 'Sale'} color="#111111" bg="#f3f4f6" />
+                  <Badge label={selectedPromotionDetail?.targetListingType || 'All'} color="#111111" bg="#f3f4f6" />
                 </View>
               </View>
             </ScrollView>
