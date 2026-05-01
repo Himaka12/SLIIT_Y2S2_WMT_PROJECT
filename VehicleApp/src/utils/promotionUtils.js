@@ -27,7 +27,13 @@ const positiveNumber = (value) => {
   return parsed > 0 ? parsed : null;
 };
 
-const getToday = () => new Date().toISOString().split('T')[0];
+const getToday = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export function normalizePromotionStatus(status) {
   const value = normalizeText(status);

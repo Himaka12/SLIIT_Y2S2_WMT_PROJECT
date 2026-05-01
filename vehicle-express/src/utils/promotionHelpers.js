@@ -97,7 +97,13 @@ const normalizeStringArray = (value) => {
 const normalizeObjectIdArray = (value) => normalizeStringArray(value)
   .filter((item) => mongoose.Types.ObjectId.isValid(item));
 
-const getToday = () => new Date().toISOString().split('T')[0];
+const getToday = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const normalizeStoredStatus = (value) => {
   const status = normalizeText(value);
