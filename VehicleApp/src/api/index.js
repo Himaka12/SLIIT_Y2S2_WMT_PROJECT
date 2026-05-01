@@ -1,66 +1,21 @@
 import axios from 'axios';
-import { getExpoGoProjectConfig } from 'expo';
-import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_PORT = '8080';
+const RENDER_API_BASE_URL = 'https://sliit-y2s2-wmt-project.onrender.com';
 const HEALTHCHECK_PATH = '/api/health';
 const BASE_URL_PROBE_TIMEOUT_MS = 1500;
 
 const normalizeBaseUrl = (url) => String(url || '').trim().replace(/\/+$/, '');
-const buildApiBaseUrl = (host) => (host ? `http://${host}:${API_PORT}` : null);
-const asUrl = (value) => (/^[a-z][a-z\d+\-.]*:\/\//i.test(value) ? value : `http://${value}`);
-
-const getBundleUrl = () => {
-  const sourceCode = NativeModules.SourceCode;
-  const rawScriptUrl = typeof sourceCode?.scriptURL === 'string'
-    ? sourceCode.scriptURL
-    : sourceCode?.getConstants?.().scriptURL;
-
-  if (!rawScriptUrl) {
-    return null;
-  }
-
-  const normalizedScriptUrl = rawScriptUrl.startsWith('/') ? `file://${rawScriptUrl}` : rawScriptUrl;
-
-  try {
-    return new URL(normalizedScriptUrl).toString();
-  } catch {
-    return null;
-  }
-};
-
-const extractHost = (value) => {
-  if (!value || typeof value !== 'string') {
-    return null;
-  }
-
-  try {
-    return new URL(asUrl(value.trim())).hostname || null;
-  } catch {
-    return null;
-  }
-};
-
 const unique = (values) => [...new Set(values.filter(Boolean))];
 
-const DEFAULT_BASE_URL = Platform.OS === 'android'
-  ? 'http://10.0.2.2:8080'
-  : 'http://localhost:8080';
-
 const getBaseUrlCandidates = () => {
-  const expoGoConfig = getExpoGoProjectConfig?.();
-  const bundleUrl = getBundleUrl();
-
   return unique([
     normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL),
-    buildApiBaseUrl(extractHost(expoGoConfig?.debuggerHost)),
-    buildApiBaseUrl(extractHost(bundleUrl)),
-    DEFAULT_BASE_URL,
+    RENDER_API_BASE_URL,
   ].map(normalizeBaseUrl));
 };
 
-export let BASE_URL = getBaseUrlCandidates()[0] || DEFAULT_BASE_URL;
+export let BASE_URL = getBaseUrlCandidates()[0] || RENDER_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
