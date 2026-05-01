@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime uploads
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output and caches
+dist/
+build/
+coverage/
+.cache/
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Accidental migration / misplaced folders
+.legacy_misplaced/
+home/

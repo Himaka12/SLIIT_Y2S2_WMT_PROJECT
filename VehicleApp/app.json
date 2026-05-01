@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Wheelzy",
+    "slug": "vehicle-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "android": {
+      "package": "com.kdautotraders.app",
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#05070c",
+          "image": "./assets/logos/wheelzy-logo.jpeg",
+          "imageWidth": 180,
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow K.D. Auto Traders to access your photos."
+        }
+      ]
+    ],
+    "scheme": "vehicleapp",
+    "extra": {
+      "eas": {
+        "projectId": "d8738d6b-a305-483a-b509-516ca7a1fed1"
+      }
+    },
+    "owner": "himakaexpogo"
+  }
+}
