@@ -125,9 +125,9 @@ export default function LoginScreen() {
       }, 900);
     } catch (err) {
       if (err?.response?.status === 503) {
-        setError(err?.response?.data?.message || 'The backend is starting up or MongoDB is unavailable. Please wait a few seconds and try again.');
+        setError(err?.response?.data?.message || 'The Render backend is waking up or reconnecting to MongoDB. Please wait a moment and try again.');
       } else if (!err?.response && (err?.code === 'ECONNABORTED' || /network error|timeout/i.test(err?.message || ''))) {
-        setError('Cannot reach the backend. Make sure vehicle-express is running, the phone and laptop are on the same network, and MongoDB Atlas allows your current IP.');
+        setError('Cannot reach the Render backend. Check your internet connection and open the backend URL once to wake the service.');
       } else {
         setError(err?.response?.data?.message || err.message || 'Invalid credentials. Please try again.');
       }

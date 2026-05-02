@@ -3,10 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RENDER_API_BASE_URL = 'https://sliit-y2s2-wmt-project.onrender.com';
 const HEALTHCHECK_PATH = '/api/health';
-const BASE_URL_PROBE_TIMEOUT_MS = 1500;
+const API_TIMEOUT_MS = 75000;
+const BASE_URL_PROBE_TIMEOUT_MS = 15000;
+const BACKEND_WARMUP_RETRY_DELAYS_MS = [1500, 3000, 5000, 8000, 12000, 16000];
 
 const normalizeBaseUrl = (url) => String(url || '').trim().replace(/\/+$/, '');
 const unique = (values) => [...new Set(values.filter(Boolean))];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getBaseUrlCandidates = () => {
   return unique([
@@ -19,7 +22,7 @@ export let BASE_URL = getBaseUrlCandidates()[0] || RENDER_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: API_TIMEOUT_MS,
 });
 
 let baseUrlResolutionPromise = null;
@@ -91,6 +94,30 @@ const shouldRetryWithFreshBaseUrl = (error) => {
   }
 
   return /network error|timeout|timed out/i.test(String(error?.message || ''));
+};
+
+const isBackendWarmingResponse = (error) => {
+  if (Number(error?.response?.status || 0) !== 503) {
+    return false;
+  }
+
+  const message = String(error?.response?.data?.message || '').toLowerCase();
+  return message.includes('database unavailable')
+    || message.includes('mongodb is unavailable')
+    || message.includes('database is not responding')
+    || message.includes('backend is starting')
+    || message.includes('temporarily unavailable');
+};
+
+const shouldRetryBackendWarmup = (error) => {
+  const config = error?.config || {};
+  const retryCount = Number(config._backendWarmupRetryCount || 0);
+
+  if (!isBackendWarmingResponse(error)) {
+    return false;
+  }
+
+  return retryCount < BACKEND_WARMUP_RETRY_DELAYS_MS.length;
 };
 
 void resolveReachableBaseUrl();
@@ -232,6 +259,17 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    if (shouldRetryBackendWarmup(error)) {
+      const originalConfig = error.config || {};
+      const retryCount = Number(originalConfig._backendWarmupRetryCount || 0);
+      const delayMs = BACKEND_WARMUP_RETRY_DELAYS_MS[retryCount];
+
+      originalConfig._backendWarmupRetryCount = retryCount + 1;
+      console.log(`[API] Backend is warming up. Retrying ${String(originalConfig.url || '')} in ${delayMs}ms (${retryCount + 1}/${BACKEND_WARMUP_RETRY_DELAYS_MS.length})`);
+      await sleep(delayMs);
+      return api.request(originalConfig);
+    }
+
     if (shouldRetryWithFreshBaseUrl(error)) {
       const originalConfig = error.config || {};
       const previousBaseUrl = normalizeBaseUrl(originalConfig.baseURL) || BASE_URL;
