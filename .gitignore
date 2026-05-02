@@ -39,9 +39,7 @@ coverage/
 tmp/
 temp/
 
-# Backend runtime uploads
-uploads/
-**/uploads/
+
 
 # Local editor and OS files
 .DS_Store
