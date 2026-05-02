@@ -9,10 +9,10 @@ const SalesInquiry = require('../models/SalesInquiry');
 const Wishlist = require('../models/Wishlist');
 const Promotion = require('../models/Promotion');
 const { authenticate, requireAdmin, requireAdminOrMarketing } = require('../middleware/auth');
-const { uploadVehicleImages } = require('../utils/upload');
+const { getUploadedFileUrl, uploadVehicleImages } = require('../utils/upload');
 
 // Helper: build image URL from uploaded file
-const fileUrl = (file) => file ? `/uploads/vehicles/${file.filename}` : null;
+const fileUrl = (file) => getUploadedFileUrl(file, 'vehicles');
 const VALID_TRANSMISSIONS = ['Manual', 'Automatic', 'Semi-Automatic'];
 const VALID_STATUSES = ['Available', 'Coming Soon', 'Sold'];
 const VALID_CONDITIONS = ['New', 'Used'];

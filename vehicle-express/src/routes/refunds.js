@@ -4,7 +4,7 @@ const router = express.Router();
 const Refund = require('../models/Refund');
 const RentalBooking = require('../models/RentalBooking');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { uploadSlip } = require('../utils/upload');
+const { getUploadedFileUrl, uploadSlip } = require('../utils/upload');
 const { getRefundAvailabilityMeta, isBookingRefundEligible } = require('../utils/refundHelpers');
 
 const REQUESTED_STATUS = 'Refund Requested';
@@ -167,7 +167,7 @@ router.post('/process/:refundId', authenticate, requireAdmin, uploadSlip.single(
 
     if (nextStatus === REFUNDED_STATUS) {
       if (req.file) {
-        refund.refundProofUrl = `/uploads/slips/${req.file.filename}`;
+        refund.refundProofUrl = getUploadedFileUrl(req.file, 'slips');
       }
       refund.status = REFUNDED_STATUS;
       refund.processingStartedAt = refund.processingStartedAt || new Date();

@@ -5,7 +5,7 @@ const Refund = require('../models/Refund');
 const User = require('../models/User');
 const Vehicle = require('../models/Vehicle');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { uploadSlip } = require('../utils/upload');
+const { getUploadedFileUrl, uploadSlip } = require('../utils/upload');
 const { isDeletedUser } = require('../utils/accountDeletion');
 const {
   REFUND_ELIGIBLE_BOOKING_STATUSES,
@@ -252,7 +252,7 @@ router.post('/rent', authenticate, uploadSlip.single('paymentSlip'), async (req,
       return res.status(400).json({ message, availability });
     }
 
-    const paymentSlipUrl = `/uploads/slips/${req.file.filename}`;
+    const paymentSlipUrl = getUploadedFileUrl(req.file, 'slips');
     const vehicle = await Vehicle.findOne({ _id: vehicleId, isDeleted: { $ne: true } }).select('_id price listingType');
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
@@ -322,7 +322,7 @@ router.put('/update/:id', authenticate, uploadSlip.single('paymentSlip'), async 
     booking.requestedUnits = normalizedRequestedUnits;
     booking.unitPrice = pricing.unitPrice;
     booking.totalAmount = pricing.totalAmount;
-    if (req.file) booking.paymentSlipUrl = `/uploads/slips/${req.file.filename}`;
+    if (req.file) booking.paymentSlipUrl = getUploadedFileUrl(req.file, 'slips');
     await booking.save();
 
     await booking.populate(['user', 'vehicle']);

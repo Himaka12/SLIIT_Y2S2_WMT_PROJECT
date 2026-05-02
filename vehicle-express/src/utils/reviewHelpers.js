@@ -1,6 +1,7 @@
 const Review = require('../models/Review');
 const RentalBooking = require('../models/RentalBooking');
 const Vehicle = require('../models/Vehicle');
+const { getUploadedFileUrl } = require('./upload');
 
 const BOOKING_STATUS_ENUM = RentalBooking.schema.path('status')?.enumValues || [];
 const REVIEW_ELIGIBLE_BOOKING_STATUSES = ['Approved'].filter((status) => BOOKING_STATUS_ENUM.includes(status));
@@ -48,7 +49,8 @@ const syncReviewLifecycleFields = (review) => {
 const extractReviewImagePaths = (files = []) => (
   (Array.isArray(files) ? files : [])
     .filter(Boolean)
-    .map((file) => `/uploads/reviews/${file.filename}`)
+    .map((file) => getUploadedFileUrl(file, 'reviews'))
+    .filter(Boolean)
     .slice(0, 5)
 );
 

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Promotion = require('../models/Promotion');
 const { authenticate, requireAdminOrMarketing } = require('../middleware/auth');
-const { uploadPromoImage } = require('../utils/upload');
+const { getUploadedFileUrl, uploadPromoImage } = require('../utils/upload');
 const {
   ACTIVE_STATUS,
   INACTIVE_STATUS,
@@ -28,7 +28,7 @@ router.post('/add', authenticate, requireAdminOrMarketing, uploadPromoImage.sing
 
     const promo = await Promotion.create({
       ...payload,
-      ...(req.file ? { imageUrl: `/uploads/promotions/${req.file.filename}` } : {}),
+      ...(req.file ? { imageUrl: getUploadedFileUrl(req.file, 'promotions') } : {}),
       createdByUserId: req.user._id,
       updatedByUserId: req.user._id,
     });
@@ -115,7 +115,7 @@ router.put('/update/:id', authenticate, requireAdminOrMarketing, uploadPromoImag
       req.params.id,
       {
         ...payload,
-        ...(req.file ? { imageUrl: `/uploads/promotions/${req.file.filename}` } : {}),
+        ...(req.file ? { imageUrl: getUploadedFileUrl(req.file, 'promotions') } : {}),
         updatedByUserId: req.user._id,
       },
       { new: true },

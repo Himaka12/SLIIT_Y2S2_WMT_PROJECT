@@ -9,7 +9,7 @@ const Refund = require('../models/Refund');
 const Review = require('../models/Review');
 const SalesInquiry = require('../models/SalesInquiry');
 const { authenticate } = require('../middleware/auth');
-const { uploadProfileImage } = require('../utils/upload');
+const { getUploadedFileUrl, uploadProfileImage } = require('../utils/upload');
 const { getComputedPromotionStatus } = require('../utils/promotionHelpers');
 const {
   ACCOUNT_DELETION_CANCELLED_STATUS,
@@ -34,6 +34,10 @@ const LEGACY_PREMIUM_CARD_ENDPOINT_MESSAGE = 'This legacy card endpoint is disab
 const buildAssetPath = (value) => {
   if (!value || typeof value !== 'string') {
     return null;
+  }
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value;
   }
 
   return value.startsWith('/') ? value : `/${value}`;
@@ -232,7 +236,7 @@ router.put('/update', authenticate, uploadProfileImage.single('profileImage'), a
     });
 
     if (req.file) {
-      user.profileImage = `/uploads/profile-images/${req.file.filename}`;
+      user.profileImage = getUploadedFileUrl(req.file, 'profile-images');
     }
 
     await user.save();
