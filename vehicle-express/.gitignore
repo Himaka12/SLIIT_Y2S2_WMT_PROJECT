@@ -6,8 +6,7 @@ node_modules/
 .env.*
 !.env.example
 
-# Runtime uploads
-uploads/
+
 
 # Logs
 *.log
