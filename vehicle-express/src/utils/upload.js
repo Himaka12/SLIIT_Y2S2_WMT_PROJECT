@@ -5,20 +5,35 @@ const { v2: cloudinary } = require('cloudinary');
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+const DEFAULT_CLOUDINARY_CLOUD_NAME = 'du2ms5uzh';
 const CLOUDINARY_ROOT_FOLDER = process.env.CLOUDINARY_ROOT_FOLDER || 'sliit-wmt';
-const hasCloudinaryConfig = Boolean(
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || DEFAULT_CLOUDINARY_CLOUD_NAME;
+const UNSIGNED_UPLOAD_PRESETS = {
+  vehicles: process.env.CLOUDINARY_VEHICLES_UPLOAD_PRESET || 'sliit_wmt_vehicles_unsigned',
+  'profile-images': process.env.CLOUDINARY_PROFILE_IMAGES_UPLOAD_PRESET || 'sliit_wmt_profile_images_unsigned',
+  promotions: process.env.CLOUDINARY_PROMOTIONS_UPLOAD_PRESET || 'sliit_wmt_promotions_unsigned',
+  reviews: process.env.CLOUDINARY_REVIEWS_UPLOAD_PRESET || 'sliit_wmt_reviews_unsigned',
+  slips: process.env.CLOUDINARY_SLIPS_UPLOAD_PRESET || 'sliit_wmt_slips_unsigned',
+};
+const hasSignedCloudinaryConfig = Boolean(
   process.env.CLOUDINARY_CLOUD_NAME
   && process.env.CLOUDINARY_API_KEY
   && process.env.CLOUDINARY_API_SECRET
 );
+const hasCloudinaryConfig = Boolean(CLOUDINARY_CLOUD_NAME);
 
 if (hasCloudinaryConfig) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  const config = {
+    cloud_name: CLOUDINARY_CLOUD_NAME,
     secure: true,
-  });
+  };
+
+  if (hasSignedCloudinaryConfig) {
+    config.api_key = process.env.CLOUDINARY_API_KEY;
+    config.api_secret = process.env.CLOUDINARY_API_SECRET;
+  }
+
+  cloudinary.config(config);
 }
 
 const sanitizeName = (value) => (
@@ -47,28 +62,38 @@ const makeStorage = (dest) => multer.diskStorage({
 const makeCloudinaryStorage = (folder) => ({
   _handleFile: (req, file, cb) => {
     const publicId = `${Date.now()}_${Math.round(Math.random() * 1e9)}_${sanitizeName(file.originalname)}`;
-    const upload = cloudinary.uploader.upload_stream(
-      {
-        folder: `${CLOUDINARY_ROOT_FOLDER}/${folder}`,
-        public_id: publicId,
-        resource_type: 'image',
-        overwrite: false,
-      },
-      (error, result) => {
-        if (error) {
-          return cb(error);
-        }
+    const options = {
+      public_id: publicId,
+    };
+    const onUploadComplete = (error, result) => {
+      if (error) {
+        return cb(error);
+      }
 
-        return cb(null, {
-          filename: result.public_id,
-          path: result.secure_url,
-          location: result.secure_url,
-          secureUrl: result.secure_url,
-          publicId: result.public_id,
-          size: result.bytes,
-        });
-      },
-    );
+      return cb(null, {
+        filename: result.public_id,
+        path: result.secure_url,
+        location: result.secure_url,
+        secureUrl: result.secure_url,
+        publicId: result.public_id,
+        size: result.bytes,
+      });
+    };
+    const upload = hasSignedCloudinaryConfig
+      ? cloudinary.uploader.upload_stream(
+        {
+          ...options,
+          folder: `${CLOUDINARY_ROOT_FOLDER}/${folder}`,
+          resource_type: 'image',
+          overwrite: false,
+        },
+        onUploadComplete,
+      )
+      : cloudinary.uploader.unsigned_upload_stream(
+        UNSIGNED_UPLOAD_PRESETS[folder],
+        options,
+        onUploadComplete,
+      );
 
     file.stream.pipe(upload);
   },
