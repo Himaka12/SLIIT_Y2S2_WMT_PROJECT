@@ -1,14 +1,4 @@
-I inspected the project again. It is a full-stack mobile vehicle sales/rental system with:
 
-- Frontend: `VehicleApp` using Expo React Native
-- Backend: `vehicle-express` using Express.js
-- Database: MongoDB with Mongoose models
-- Deployment backend URL: `https://sliit-y2s2-wmt-project.onrender.com`
-- GitHub remote: `https://github.com/Himaka12/SLIIT_Y2S2_WMT_PROJECT.git`
-
-Here is a clean full `README.md` content you can use in GitHub:
-
-```md
 # Vehicle Sales & Rental Mobile App
 
 A full-stack mobile application for vehicle sales and rental management. The system includes an Expo React Native mobile app, an Express.js backend API, and a MongoDB database. It supports customer vehicle browsing, rental bookings, refund claims, sales inquiries, reviews, promotions, wishlist management, and admin/marketing management workflows.
@@ -420,7 +410,6 @@ https://sliit-y2s2-wmt-project.onrender.com
 
 | Role | Access |
 | --- | --- |
-| Guest | Browse vehicles and promotions |
 | Customer | Bookings, refunds, inquiries, reviews, wishlist, profile |
 | Marketing Manager | Promotions, inquiries, review-related workflows |
 | Admin | Full system management |
@@ -707,15 +696,6 @@ promotions.js
 promotionHelpers.js
 ```
 
-## Security Notes
-
-- Do not commit `.env` files.
-- Do not commit real database credentials.
-- Do not commit JWT secrets.
-- Do not commit Cloudinary API secrets.
-- Do not commit `node_modules`.
-- Do not commit runtime upload files.
-- Keep `.env.example` files for setup reference only.
 
 ## Important Git Ignore Notes
 
